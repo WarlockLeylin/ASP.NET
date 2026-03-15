@@ -1,0 +1,13 @@
+﻿If we need a NotificationService to send emails when a task is completed, I would go with async integration using RabbitMQ.
+
+The reason — if we do it synchronously via HTTP/REST,
+Task Service would directly call NotificationService. 
+That's not great because:
+
+If NotificationService is down, completing a task would fail.
+Sending an email is slow, the waiting time will be high
+
+With RabbitMQ it works differently — Task Service just publishes a message to the
+"task.completed" queue and forgets about it. NotificationService is subscribed
+to that queue and processes the message when it's ready. Even if it's temporarily
+unavailable — the message won't be lost because DB stores it.
